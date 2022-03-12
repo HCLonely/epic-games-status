@@ -11,10 +11,10 @@ jobs:
     steps:
       - name: Checkout codes
         uses: actions/checkout@v2
-      with:
-        ref: '1.0.0'
-        fetch-depth: 0
-        lfs: true
+        with:
+          ref: '1.0.0'
+          fetch-depth: 0
+          lfs: true
       - name: Set git identity
         run : |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
