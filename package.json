@@ -1,0 +1,17 @@
+{
+  "name": "epic-games-status",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node epic-library-sync.js"
+  },
+  "author": "HCLonely",
+  "license": "MIT",
+  "devDependencies": {
+    "axios": "^0.26.1",
+    "dayjs": "^1.10.8",
+    "eslint": "^8.11.0"
+  }
+}
