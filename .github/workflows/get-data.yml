@@ -32,6 +32,6 @@ jobs:
         env:
           TZ: Asia/Shanghai
         run: |
-          git add README.md
+          git add .
           git commit -m 'Daily update'
           git push origin 1.0.0
