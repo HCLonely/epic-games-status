@@ -96,7 +96,7 @@ function freeGamesPromotions() {
         const { startDate, endDate } = [
           ...(promotions?.promotionalOffers || []),
           ...(promotions?.upcomingPromotionalOffers || [])
-        ]?.[0]?.promotionalOffers || {};
+        ]?.[0]?.promotionalOffers?.[0] || {};
         return {
           name: title,
           offerId: id,
@@ -116,4 +116,6 @@ function freeGamesPromotions() {
   await getReleasedGames(sha256Hash, null, status.releasedGames.archived);
   await getComingsoonGames(sha256Hash);
   await getFreeGames(sha256Hash);
+
+  // await freeGamesPromotions()
 })();
