@@ -103,7 +103,7 @@ function freeGamesPromotions() {
           namespace,
           pageSlug: [...new Set([offerMappings?.[0]?.pageSlug, urlSlug, customAttributes?.find((e) => e.key === 'com.epicgames.app.productSlug')?.value?.replace(/\/home$/, '')].filter((e) => e))], // eslint-disable-line
           type: categories?.[0]?.path,
-          promotions: { startDate: new Date().getTime(startDate), endDate: new Date().getTime(endDate) }
+          promotions: { startDate: new Date(startDate).getTime(), endDate: new Date(endDate).getTime() }
         };
       }))
     .catch((error) => { throw error; });
