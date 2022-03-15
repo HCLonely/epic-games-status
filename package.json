@@ -10,8 +10,10 @@
   "author": "HCLonely",
   "license": "MIT",
   "devDependencies": {
-    "axios": "^0.26.1",
-    "dayjs": "^1.10.8",
     "eslint": "^8.11.0"
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "dayjs": "^1.11.0"
   }
 }

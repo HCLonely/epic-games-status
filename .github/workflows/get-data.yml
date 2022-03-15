@@ -26,7 +26,7 @@ jobs:
           node-version: '16.x'
       - name: Run
         run: |
-          npm install -D
+          npm install -S
           npm start
       - name: Push Commits
         env:
