@@ -13,7 +13,7 @@ jobs:
       - name: Checkout codes
         uses: actions/checkout@v2
         with:
-          ref: '1.0.0'
+          ref: 'main'
           fetch-depth: 0
           lfs: true
       - name: Set git identity
@@ -34,4 +34,4 @@ jobs:
         run: |
           git add .
           git commit -m 'Daily update'
-          git push origin 1.0.0
+          git push origin main
