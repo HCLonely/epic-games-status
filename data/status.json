@@ -1,14 +1,14 @@
 {
     "releasedGames": {
-        "total": 2987,
-        "archived": 2900,
-        "updateTime": "2022-05-11"
+        "total": 3001,
+        "archived": 3000,
+        "updateTime": "2022-05-13"
     },
     "comingsoonGames": {
-        "total": 197,
-        "updateTime": "2022-05-12"
+        "total": 196,
+        "updateTime": "2022-05-13"
     },
     "freeGames": {
-        "updateTime": "2022-05-12"
+        "updateTime": "2022-05-13"
     }
 }
