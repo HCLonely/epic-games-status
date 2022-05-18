@@ -4,10 +4,17 @@ const dayjs = require('dayjs');
 
 const status = JSON.parse(fs.readFileSync('data/status.json'));
 const time = dayjs().format('YYYY-MM-DD');
+const options = {
+  headers: {
+    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    // eslint-disable-next-line max-len
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36 Edg/101.0.1210.47'
+  }
+};
 
 function getSha256Hash() {
   console.log('Getting Sha256Hash...');
-  return axios.get('https://www.epicgames.com/store/zh-CN/browse?sortBy=releaseDate&sortDir=DESC&count=1')
+  return axios.get('https://www.epicgames.com/store/zh-CN/browse?sortBy=releaseDate&sortDir=DESC&count=1', options)
     .then((response) => {
       console.log(response);
       response.data?.match(/\["withPromotions",null\],"([\w\w]+?)"]/)?.[1];
@@ -20,7 +27,7 @@ function getSha256Hash() {
 
 function getReleasedGamesTotal(sha256Hash) {
   console.log('Getting ReleasedGames Total...');
-  return axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:1,%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22DESC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`) // eslint-disable-line
+  return axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:1,%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22DESC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.paging?.total)
     .catch(() => null);
 }
@@ -32,7 +39,7 @@ async function getReleasedGames(sha256Hash, total, start = 0) {
   }
   const count = start + 100;
   console.log(`Getting Released Games...[${count > total ? total : count} / ${total}]`);
-  const games = await axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:100,%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22DESC%22,%22start%22:${start},%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`) // eslint-disable-line
+  const games = await axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:100,%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22DESC%22,%22start%22:${start},%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.elements?.map(({ title, id, namespace, offerMappings, urlSlug, categories, customAttributes }) => ({ name: title, offerId: id, namespace, pageSlug: [...new Set([offerMappings?.[0]?.pageSlug, urlSlug, customAttributes.find(e => e.key === 'com.epicgames.app.productSlug')?.value?.replace(/\/home$/, '')].filter(e => e))], type: categories?.[0]?.path }))) // eslint-disable-line
     .catch(() => []);
 
@@ -53,7 +60,7 @@ async function getReleasedGames(sha256Hash, total, start = 0) {
 
 function getComingsoonGamesTotal(sha256Hash) {
   console.log('Getting ComingsoonGames Total...');
-  return axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:true,%22count%22:1,%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`) // eslint-disable-line
+  return axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:true,%22count%22:1,%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.paging?.total)
     .catch((error) => { throw error; });
 }
@@ -64,7 +71,7 @@ async function getComingsoonGames(sha256Hash) {
     return console.log(`[${time}] No new comingsoon games!`);
   }
   console.log('Getting Comingsoon Games...');
-  const games = await axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:true,%22count%22:${total},%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`) // eslint-disable-line
+  const games = await axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:true,%22count%22:${total},%22country%22:%22CN%22,%22keywords%22:%22%22,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.elements?.map(({ title, id, namespace, offerMappings, urlSlug, categories, customAttributes }) => ({ name: title, offerId: id, namespace, pageSlug: [...new Set([offerMappings?.[0]?.pageSlug, urlSlug, customAttributes?.find(e => e.key === 'com.epicgames.app.productSlug')?.value?.replace(/\/home$/, '')].filter(e => e))], type: categories?.[0]?.path }))) // eslint-disable-line
     .catch((error) => { throw error; });
   if (games.length > 0) {
@@ -76,7 +83,7 @@ async function getComingsoonGames(sha256Hash) {
 }
 function getFreeGamesTotal(sha256Hash) {
   console.log('Getting FreeGames Total...');
-  return axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:1,%22country%22:%22CN%22,%22keywords%22:%22%22,%22freeGame%22:true,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`) // eslint-disable-line
+  return axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:1,%22country%22:%22CN%22,%22keywords%22:%22%22,%22freeGame%22:true,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.paging?.total)
     .catch((error) => { throw error; });
 }
@@ -84,7 +91,7 @@ async function getFreeGames(sha256Hash) {
   const total = await getFreeGamesTotal(sha256Hash); // eslint-disable-line
   if (!total) throw 'Get free games total failed';
   console.log('Getting Free Games...');
-  const freeGames = await axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:${total},%22country%22:%22CN%22,%22keywords%22:%22%22,%22freeGame%22:true,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`) // eslint-disable-line
+  const freeGames = await axios.get(`https://www.epicgames.com/graphql?operationName=searchStoreQuery&variables=%7B%22category%22:%22games%2Fedition%2Fbase%7Csoftware%2Fedition%2Fbase%7Ceditors%7Cbundles%2Fgames%7Caddons%7Cgames%2Fdemo%22,%22comingSoon%22:false,%22count%22:${total},%22country%22:%22CN%22,%22keywords%22:%22%22,%22freeGame%22:true,%22locale%22:%22zh-CN%22,%22sortBy%22:%22releaseDate%22,%22sortDir%22:%22ASC%22,%22tag%22:%22%22,%22withPrice%22:false%7D&extensions=%7B%22persistedQuery%22:%7B%22version%22:1,%22sha256Hash%22:%22${sha256Hash}%22%7D%7D`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.elements?.map(({ title, id, namespace, offerMappings, urlSlug, categories, customAttributes }) => ({ name: title, offerId: id, namespace, pageSlug: [...new Set([offerMappings?.[0]?.pageSlug, urlSlug, customAttributes?.find(e => e.key === 'com.epicgames.app.productSlug')?.value?.replace(/\/home$/, '')].filter(e => e))], type: categories?.[0]?.path }))) // eslint-disable-line
     .catch((error) => { throw error; });
   const games = [...freeGames, ...await freeGamesPromotions()];
@@ -96,7 +103,7 @@ async function getFreeGames(sha256Hash) {
 }
 function freeGamesPromotions() {
   console.log('Getting Free Games Promotions...');
-  return axios.get(`https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=zh-CN&country=CN&allowCountries=CN`) // eslint-disable-line
+  return axios.get(`https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=zh-CN&country=CN&allowCountries=CN`, options) // eslint-disable-line
     .then((response) => response.data?.data?.Catalog?.searchStore?.elements?.filter(({ promotions }) => promotions)
       .map(({ title, id, namespace, offerMappings, urlSlug, categories, customAttributes, promotions }) => {
         const { startDate, endDate } = [
