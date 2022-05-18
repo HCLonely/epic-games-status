@@ -8,8 +8,14 @@ const time = dayjs().format('YYYY-MM-DD');
 function getSha256Hash() {
   console.log('Getting Sha256Hash...');
   return axios.get('https://www.epicgames.com/store/zh-CN/browse?sortBy=releaseDate&sortDir=DESC&count=1')
-    .then((response) => response.data?.match(/\["withPromotions",null\],"([\w\w]+?)"]/)?.[1])
-    .catch(() => null);
+    .then((response) => {
+      console.log(response);
+      response.data?.match(/\["withPromotions",null\],"([\w\w]+?)"]/)?.[1];
+    })
+    .catch((error) => {
+      console.log(error);
+      return null;
+    });
 }
 
 function getReleasedGamesTotal(sha256Hash) {
