@@ -9,15 +9,18 @@ const options = {
     accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     // eslint-disable-next-line max-len
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36 Edg/101.0.1210.47'
+  },
+  validateStatus(status) {
+    return (status >= 200 && status < 300) || status === 403; // default
   }
 };
 
 function getSha256Hash() {
   console.log('Getting Sha256Hash...');
-  return axios.get('https://store.epicgames.com/browse', options)
+  return axios.get('https://store.epicgames.com/store/zh-CN/browse?sortBy=releaseDate&sortDir=DESC&count=1', options)
     .then((response) => {
       console.log(response);
-      response.data?.match(/\["withPromotions",null\],"([\w\w]+?)"]/)?.[1];
+      return response.data?.match(/\["withPromotions",null\],"([\w\w]+?)"]/)?.[1];
     })
     .catch((error) => {
       console.log(error);
